@@ -1,7 +1,8 @@
 import numpy as np
-from smt.surrogate_models import KRG
+from smt.surrogate_models import RMTC
 import csv
-import pickle as pkl
+from matplotlib import pyplot as plt
+import openmdao.api as om
 
 # Reading CSV file
 data = []
@@ -14,33 +15,24 @@ with open('datax.csv', 'rt') as fid:
         except:
             pass
 
-# Scaling
-data = np.array(data)
-lb = np.tile(np.min(data, axis=0), (data.shape[0], 1))
-ub = np.tile(np.max(data, axis=0), (data.shape[0], 1))
-data_scaled = (data - lb)/(ub - lb)
-lb_x = lb[0, 0:2]
-ub_x = ub[0, 0:2]
-lb_y = lb[0, 2:]
-ub_y = ub[0, 2:]
+# Create surrogate model
+xt = np.array(data)[:,0:2]
+yt = np.array(data)[:,2:]
+RANGE = np.array([np.min(xt, axis=0), np.max(xt, axis=0)])
 
-# Create KRG surrogate model
-xt = data_scaled[:, 0:2]
-yt = data_scaled[:, 2:]
-
-sm = KRG()
+sm = RMTC(print_global=False, xlimits=RANGE.transpose())
 sm.set_training_values(xt, yt)
 sm.train()
 
-# Testing SM
-# x = np.array([[0.55104, -11]])
-# x_scaled = (x - lb_x)/(ub_x - lb_x)
-# y_scaled = sm.predict_values(x_scaled)
-# y = lb_y + (ub_y - lb_y)*y_scaled
-# print(x)
-# print(y)
+# Plot
+fg = plt.figure()
+N = 31
+[X, Y] = np.meshgrid(np.linspace(RANGE[0,0], RANGE[1,0], N), np.linspace(RANGE[0,1], RANGE[1,1], N))
+I = np.concatenate((np.reshape(X, (-1,1)), np.reshape(Y, (-1,1))), axis=1)
+R = sm.predict_values(I)
+plt.contourf(X, Y, np.reshape(R[:,0], (N,N)))
+plt.plot(xt[:,0], xt[:,1], 'ko')
+plt.show()
 
-# Saving SM
-with open('datax.pkl', 'wb') as fid:
-    pkl.dump(sm, fid)
-
+prob = om.Problem()
+prob.model = om
