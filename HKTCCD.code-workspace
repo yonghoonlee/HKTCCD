@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.defaultInterpreterPath": "~/miniforge3/envs/hktccd/bin/python",
+	}
+    
+}
