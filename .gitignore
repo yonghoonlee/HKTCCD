@@ -1,3 +1,12 @@
+# Custom
+.DS_Store
+IPOPT.out
+coloring_files/
+*.pdf
+reports/
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
