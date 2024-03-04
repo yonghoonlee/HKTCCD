@@ -35,6 +35,7 @@ class hkt_generator(om.ExplicitComponent):
         self.add_output('power', shape=(nn,), units='mW')
         self.add_output('omega', shape=(nn,), units='rad/s')
         self.add_output('avg_power', shape=(1,), units='mW')
+        self.add_output('duct_contraction_ratio_rate', shape=((nn-1),), units=None)
 
 
     def setup_partials(self):
@@ -43,6 +44,7 @@ class hkt_generator(om.ExplicitComponent):
         self.declare_partials('power', ['V_water', 'duct_contraction_ratio', 'pitch'], method='fd')
         self.declare_partials('omega', ['V_water', 'duct_contraction_ratio', 'pitch'], method='fd')
         self.declare_partials('avg_power', ['V_water', 'duct_contraction_ratio', 'pitch', 't'], method='fd')
+        self.declare_partials('duct_contraction_ratio_rate', ['duct_contraction_ratio', 't'], method='fd')
 
 
     def compute(self, inputs, outputs):
@@ -71,4 +73,5 @@ class hkt_generator(om.ExplicitComponent):
         outputs['omega'] = omega
         outputs['power'] = power
         outputs['avg_power'] = np.sum(power)/t[-1]
+        outputs['duct_contraction_ratio_rate'] = (duct_contraction_ratio[1:] - duct_contraction_ratio[0:-1])/(t[1:]-t[0:-1])
 
